@@ -1,20 +1,23 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Review Kantin API - Tugas 2",
+    "title": "Review Kantin API - Tugas 3",
     "version": "1.0.0",
     "description": ""
   },
   "host": "localhost:3000",
-  "servers": [
-    {
-      "url": "http://localhost:3000"
-    }
-  ],
   "basePath": "/",
   "schemes": [
     "http"
   ],
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Isi dengan: Bearer <token>"
+    }
+  },
   "paths": {
     "/health": {
       "get": {
@@ -32,15 +35,38 @@
     "/api/v1/users/": {
       "get": {
         "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Daftar user"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "403": {
+            "description": "Hanya admin"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "post": {
         "description": "",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -53,8 +79,25 @@
         "responses": {
           "201": {
             "description": "User dibuat"
+          },
+          "400": {
+            "description": "Validasi gagal"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "403": {
+            "description": "Hanya admin"
+          },
+          "409": {
+            "description": "Email sudah terdaftar"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/users/{id}": {
@@ -66,13 +109,32 @@
             "in": "path",
             "required": true,
             "type": "integer"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Detail user"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "403": {
+            "description": "Hanya admin"
+          },
+          "404": {
+            "description": "User tidak ditemukan"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/stalls/": {
@@ -103,12 +165,20 @@
         "responses": {
           "200": {
             "description": "Daftar warung (filter + pagination)"
+          },
+          "400": {
+            "description": "Validasi gagal"
           }
         }
       },
       "post": {
         "description": "",
         "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -121,8 +191,22 @@
         "responses": {
           "201": {
             "description": "Warung dibuat"
+          },
+          "400": {
+            "description": "Validasi gagal"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "403": {
+            "description": "Role tidak punya akses"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/stalls/{id}": {
@@ -140,6 +224,9 @@
           "200": {
             "description": "Detail warung"
           },
+          "400": {
+            "description": "Validasi gagal"
+          },
           "404": {
             "description": "Tidak ditemukan"
           }
@@ -155,6 +242,11 @@
             "type": "integer"
           },
           {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "required": true,
@@ -166,8 +258,25 @@
         "responses": {
           "200": {
             "description": "Warung ter-update"
+          },
+          "400": {
+            "description": "Validasi gagal"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "403": {
+            "description": "Bukan warung milikmu / role tidak punya akses"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
         "description": "",
@@ -177,13 +286,77 @@
             "in": "path",
             "required": true,
             "type": "integer"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "Warung terhapus"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "403": {
+            "description": "Hanya admin"
+          },
+          "404": {
+            "description": "Tidak ditemukan"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/stalls/{id}/reviews": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReviewInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Review dibuat"
+          },
+          "400": {
+            "description": "Validasi gagal"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "404": {
+            "description": "Warung tidak ditemukan"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/menu-items/": {
@@ -285,24 +458,9 @@
         "responses": {
           "200": {
             "description": "Daftar review (JOIN nama user)"
-          }
-        }
-      },
-      "post": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ReviewInput"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Review dibuat"
+          },
+          "400": {
+            "description": "Validasi gagal"
           }
         }
       }
@@ -316,13 +474,32 @@
             "in": "path",
             "required": true,
             "type": "integer"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Review terhapus"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          },
+          "403": {
+            "description": "Hanya admin"
+          },
+          "404": {
+            "description": "Review tidak ditemukan"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/likes/": {
@@ -426,9 +603,165 @@
           }
         }
       }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Registrasi berhasil (role otomatis customer)"
+          },
+          "400": {
+            "description": "Validasi gagal"
+          },
+          "409": {
+            "description": "Email sudah terdaftar"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login berhasil, balikin token JWT"
+          },
+          "400": {
+            "description": "Validasi gagal"
+          },
+          "401": {
+            "description": "Email atau password salah"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data user dari token"
+          },
+          "401": {
+            "description": "Belum login / token tidak valid"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
+    "RegisterInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Siti Aminah"
+        },
+        "email": {
+          "type": "string",
+          "example": "siti@test.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "password123"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "password"
+      ]
+    },
+    "LoginInput": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "example": "siti@test.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "password123"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "StallInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Warung Baru"
+        },
+        "category": {
+          "type": "string",
+          "example": "Nasi"
+        },
+        "location": {
+          "type": "string",
+          "example": "Kantin FK"
+        },
+        "description": {
+          "type": "string",
+          "example": "Deskripsi warung"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "ReviewInput": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "number",
+          "example": 5
+        },
+        "comment": {
+          "type": "string",
+          "example": "Enak banget"
+        }
+      },
+      "required": [
+        "rating"
+      ]
+    },
     "UserInput": {
       "type": "object",
       "properties": {
@@ -456,35 +789,6 @@
         "role"
       ]
     },
-    "StallInput": {
-      "type": "object",
-      "properties": {
-        "ownerId": {
-          "type": "number",
-          "example": 2
-        },
-        "name": {
-          "type": "string",
-          "example": "Warung Baru"
-        },
-        "category": {
-          "type": "string",
-          "example": "Nasi"
-        },
-        "location": {
-          "type": "string",
-          "example": "Kantin FK"
-        },
-        "description": {
-          "type": "string",
-          "example": ""
-        }
-      },
-      "required": [
-        "ownerId",
-        "name"
-      ]
-    },
     "MenuItemInput": {
       "type": "object",
       "properties": {
@@ -509,32 +813,6 @@
         "stallId",
         "name",
         "price"
-      ]
-    },
-    "ReviewInput": {
-      "type": "object",
-      "properties": {
-        "stallId": {
-          "type": "number",
-          "example": 1
-        },
-        "userId": {
-          "type": "number",
-          "example": 12
-        },
-        "rating": {
-          "type": "number",
-          "example": 5
-        },
-        "comment": {
-          "type": "string",
-          "example": "Enak banget"
-        }
-      },
-      "required": [
-        "stallId",
-        "userId",
-        "rating"
       ]
     },
     "LikeInput": {

@@ -1,41 +1,46 @@
 import swaggerAutogen from 'swagger-autogen';
 
 const doc = {
-  info: { title: 'Review Kantin API - Tugas 2', version: '1.0.0' },
-  servers: [{ url: 'http://localhost:3000' }],
+  info: { title: 'Review Kantin API - Tugas 3', version: '1.0.0' },
+  host: 'localhost:3000',
+  schemes: ['http'],
+  securityDefinitions: {
+    bearerAuth: {
+      type: 'apiKey',
+      in: 'header',
+      name: 'Authorization',
+      description: 'Isi dengan: Bearer <token>',
+    },
+  },
   definitions: {
-    UserInput: {
-      $name: 'Bagas Pratama',
-      $email: 'bagas2@student.test',
-      $passwordHash: 'hash_contoh',
-      $role: 'customer',
+    RegisterInput: {
+      $name: 'Siti Aminah',
+      $email: 'siti@test.com',
+      $password: 'password123',
+    },
+    LoginInput: {
+      $email: 'siti@test.com',
+      $password: 'password123',
     },
     StallInput: {
-      $ownerId: 2,
       $name: 'Warung Baru',
       category: 'Nasi',
       location: 'Kantin FK',
-      description: '',
-    },
-    MenuItemInput: {
-      $stallId: 1,
-      $name: 'Menu Baru',
-      $price: 15000,
-      isAvailable: true,
+      description: 'Deskripsi warung',
     },
     ReviewInput: {
-      $stallId: 1,
-      $userId: 12,
       $rating: 5,
       comment: 'Enak banget',
     },
-    LikeInput: {
-      $reviewId: 1,
-      $userId: 13,
+    UserInput: {
+      $name: 'Bagas Pratama',
+      $email: 'bagas2@student.test',
+      $password: 'password123',
+      $role: 'customer',
     },
-    FlagStatusInput: {
-      $status: 'resolved',
-    },
+    MenuItemInput: { $stallId: 1, $name: 'Menu Baru', $price: 15000, isAvailable: true },
+    LikeInput: { $reviewId: 1, $userId: 13 },
+    FlagStatusInput: { $status: 'resolved' },
     AuditLogInput: {
       $userId: 1,
       $action: 'CREATE',

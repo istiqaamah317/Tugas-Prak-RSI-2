@@ -1,7 +1,15 @@
-import { UserRepository, type CreateUserInput } from '../repositories/userRepository.ts';
+import bcrypt from 'bcryptjs';
+import { UserRepository } from '../repositories/userRepository.ts';
 import type { UserResponseDto } from '../dtos/userDto.ts';
+import { AppError } from '../errors.ts';
 
 type UserRow = { id: number; name: string; email: string; role: string; createdAt: Date | null };
+type CreateUserBody = {
+  name: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'owner' | 'customer';
+};
 
 export class UserService {
   constructor(private userRepository: UserRepository = new UserRepository()) {}
@@ -23,13 +31,22 @@ export class UserService {
 
   async getUserById(id: number): Promise<UserResponseDto> {
     const row = await this.userRepository.findById(id);
-    if (!row) throw new Error('USER_NOT_FOUND');
+    if (!row) throw new AppError(404, 'User tidak ditemukan');
     return this.toDto(row);
   }
 
-  async createUser(input: CreateUserInput): Promise<UserResponseDto> {
-    const row = await this.userRepository.create(input);
-    if (!row) throw new Error('USER_NOT_FOUND');
+  async createUser(body: CreateUserBody): Promise<UserResponseDto> {
+    const existing = await this.userRepository.findByEmail(body.email);
+    if (existing) throw new AppError(409, 'Email sudah terdaftar');
+
+    const passwordHash = await bcrypt.hash(body.password, 10);
+    const row = await this.userRepository.create({
+      name: body.name,
+      email: body.email,
+      passwordHash,
+      role: body.role,
+    });
+    if (!row) throw new Error('Gagal membuat user');
     return this.toDto(row);
   }
 }
