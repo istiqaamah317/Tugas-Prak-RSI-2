@@ -773,9 +773,9 @@
           "type": "string",
           "example": "bagas2@student.test"
         },
-        "passwordHash": {
+        "password": {
           "type": "string",
-          "example": "hash_contoh"
+          "example": "password123"
         },
         "role": {
           "type": "string",
@@ -785,7 +785,7 @@
       "required": [
         "name",
         "email",
-        "passwordHash",
+        "password",
         "role"
       ]
     },

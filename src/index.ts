@@ -1,4 +1,5 @@
 import express, { type Request, type Response, type Application } from 'express';
+import cors from 'cors';
 import { sql } from 'drizzle-orm';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './docs/swagger-output.json' with { type: 'json' };
@@ -15,6 +16,14 @@ import { authRouter } from './routes/authRouter.ts';
 
 const app: Application = express();
 const PORT: number = 3000;
+
+// CORS: izinkan frontend (Vite) memanggil API ini dari origin yang berbeda.
+// Autentikasi pakai header Authorization (Bearer), jadi tidak perlu credentials.
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+  }),
+);
 
 app.use(express.json());
 
